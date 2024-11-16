@@ -11,11 +11,12 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.0",
-    "ejs": "^2.5.7",
-    "express": "^4.15.4",
-    "supertest": "^6.2.3"
+    "ejs": "^3.1.10",
+    "express": "^4.21.1"
   },
   "devDependencies": {
-    "jest": "^28.0.2"
+    "jest": "^28.0.2",
+    "mocha": "^10.8.2",
+    "supertest": "^7.0.0"
   }
 }

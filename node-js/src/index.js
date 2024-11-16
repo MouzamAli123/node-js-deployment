@@ -1,55 +1,52 @@
-//dependencies required for the app
-var express = require("express");
-var bodyParser = require("body-parser");
-var app = express();
-const port = process.env.PORT || 3000;
+const express = require("express");
+const bodyParser = require("body-parser");
 
+const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-//render css files
 app.use(express.static("public"));
 
+let tasks = [
+    { id: 1, name: "Buy a new Udemy course", completed: false },
+    { id: 2, name: "Practice with Kubernetes", completed: false },
+];
+let completedTasks = [];
 
-//placeholders for added task
-var task = ["buy a new udemy course", "practise with kubernetes"];
-//placeholders for removed task
-var complete = ["finish reading the book"];
+// Function to generate unique task IDs
+const generateId = () => {
+    return tasks.length > 0 ? Math.max(...tasks.map(task => task.id)) + 1 : 1;
+};
 
-
-//post route for adding new task 
-app.post("/addtask", function (req, res) {
-    var newTask = req.body.newtask;
-    //add the new task from the post route
-    task.push(newTask);
-    res.redirect("/");
-});
-
-
-app.post("/removetask", function (req, res) {
-    var completeTask = req.body.check;
-    //check for the "typeof" the different completed task, then add into the complete task
-    if (typeof completeTask === "string") {
-        complete.push(completeTask);
-        //check if the completed task already exits in the task when checked, then remove it
-        task.splice(task.indexOf(completeTask), 1);
-    } else if (typeof completeTask === "object") {
-        for (var i = 0; i < completeTask.length; i++) {
-            complete.push(completeTask[i]);
-            task.splice(task.indexOf(completeTask[i]), 1);
-        }
+// Route for adding a new task
+app.post("/addtask", (req, res) => {
+    const newTaskName = req.body.newtask.trim();
+    if (newTaskName) {
+        const newTask = { id: generateId(), name: newTaskName, completed: false };
+        tasks.push(newTask);
     }
     res.redirect("/");
 });
 
-
-//render the ejs and display added task, completed task
-app.get("/", function (req, res) {
-    res.render("index", { task: task, complete: complete });
+// Route for toggling task completion
+app.post("/toggletask", (req, res) => {
+    const taskId = parseInt(req.body.check);
+    const taskIndex = tasks.findIndex(task => task.id === taskId);
+    if (taskIndex !== -1) {
+        tasks[taskIndex].completed = !tasks[taskIndex].completed; // Toggle completion status
+    }
+    res.redirect("/");
 });
 
+// Render the main page with tasks and completed tasks
+app.get("/", (req, res) => {
+    const completedTasks = tasks.filter(task => task.completed);
+    const pendingTasks = tasks.filter(task => !task.completed);
+    res.render("index", { task: pendingTasks, complete: completedTasks });
+});
 
-//set app to listen on port 3000
-app.listen(3000, function () {
-    console.log("server is running on port http://localhost:" + port);
+// Start server
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
 });
