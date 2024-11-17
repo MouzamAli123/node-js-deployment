@@ -2,18 +2,18 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = '<AWS_REGION>'
+        AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '<AWS_ACCOUNT_ID>'
-        REPOSITORY_NAME = '<REPOSITORY_NAME>'
+        REPOSITORY_NAME = 'node-js-deployment'
         EC2_INSTANCE_IP = '<EC2_INSTANCE_IP>'
-        IMAGE_NAME = '<IMAGE_NAME>'
+        IMAGE_NAME = 'node-js-deployment'
         ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPOSITORY_NAME}"
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'master', url: 'https://github.com/mouzamali123/node-web-app'
+                git branch: 'master', url: 'https://github.com/mouzamali123/node-js-deployment'
             }
         }
 
@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'credentialsId', keyFileVariable: 'SSH_KEY')]) {
+                    withCredentials([sshUser PrivateKey(credentialsId: 'credentialsId', keyFileVariable: 'SSH_KEY')]) {
                         echo "SSH key has been loaded successfully."
 
                         // Create a script to run on the remote EC2 instance
@@ -50,7 +50,7 @@ pipeline {
                         ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ubuntu@${EC2_INSTANCE_IP} <<EOF
                             echo "Starting deployment..."
                             # Authenticate with ECR
-                            /usr/local/bin/aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URI}
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_URI}
 
                             # Pull the latest image
                             docker pull ${ECR_URI}:latest
