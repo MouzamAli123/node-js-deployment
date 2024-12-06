@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 script {
-                    withCredentials([sshUser PrivateKey(credentialsId: 'credentialsId', keyFileVariable: 'SSH_KEY')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'credentialsId', keyFileVariable: 'SSH_KEY')]) {
                         echo "SSH key has been loaded successfully."
 
                         // Create a script to run on the remote EC2 instance
